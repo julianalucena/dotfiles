@@ -1,0 +1,112 @@
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/dotfiles/vim/bundle/vundle
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-ragtag'
+Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-endwise'
+Plugin 'scrooloose/nerdtree'
+Plugin 'mileszs/ack.vim'
+Plugin 'ervandew/supertab'
+Plugin 'Townk/vim-autoclose'
+Plugin 'henrik/vim-indexed-search'
+Plugin 'kien/ctrlp.vim'
+
+" Status tabline
+Plugin 'bling/vim-airline'
+
+"Theme
+Plugin 'altercation/vim-colors-solarized'
+
+" Ruby
+Plugin 'vim-ruby/vim-ruby'
+Plugin 'tpope/vim-rails'
+Plugin 'kana/vim-textobj-user'
+Plugin 'nelstrom/vim-textobj-rubyblock'
+
+" JavaScript
+Plugin 'pangloss/vim-javascript'
+Plugin 'kchmck/vim-coffee-script'
+
+" HTML
+Plugin 'mattn/emmet-vim'
+
+" Handlebars
+Bundle 'mustache/vim-mustache-handlebars'
+
+"GitHub
+Plugin 'mattn/gist-vim'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+
+syntax enable
+set background=dark
+colorscheme solarized
+set guifont=Menlo:h13
+
+set colorcolumn=80
+set number          " show line numbers
+set guioptions-=r   "remove right-hand scroll bar
+set guioptions-=L   "remove left-hand scroll bar
+set exrc            " enable per-directory .vimrc files
+set secure          " disable unsafe commands in local .vimrc files
+
+" NERDTree settings
+nmap wm :NERDTree<cr>
+let NERDTreeIgnore=['\.swp$']
+
+" Strip trailing whitespace
+function! <SID>StripTrailingWhitespaces()
+    " Preparation: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " Do the business:
+    %s/\s\+$//e
+    " Clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
+endfunction
+autocmd BufWritePre * :call <SID>StripTrailingWhitespaces()
+
+"indent settings
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set expandtab
+set autoindent
+
+" when press { + Enter, the {} block will expand.
+imap {<CR> {}<ESC>i<CR><ESC>O
+
+"add some line space for easy reading
+set linespace=4
+
+" Highlighting search matches
+set hlsearch
+
+set wildmenu
+
+" Necessary for ruby blocks
+runtime macros/matchit.vim
+
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
