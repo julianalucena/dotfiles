@@ -1,2 +1,5 @@
 # PostgreSQL start
 alias pg_start="postgres -D /usr/local/var/postgres"
+
+# MySQL start
+alias mysql_start="mysql.server start"
