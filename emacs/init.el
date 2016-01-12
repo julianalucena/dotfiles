@@ -24,7 +24,7 @@
 (setq ns-use-native-fullscreen nil)
 (toggle-frame-fullscreen)
 
-(setq indent-tabs-mode nil
+(setq-default indent-tabs-mode nil
       show-trailing-whitespace t
       inhibit-startup-message t
       initial-scratch-message nil)
@@ -34,11 +34,13 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'post-forward)
 
-(use-package solarized-theme
-  :ensure t
-  :config
-  (load-theme 'solarized-dark)
-  (set-face-attribute 'default nil :font "Monaco-12"))
+; (use-package solarized-theme
+;   :ensure t
+;   :config
+;   (load-theme 'solarized-dark)
+;   (set-face-attribute 'default nil :font "Monaco-12"))
+(add-to-list 'custom-theme-load-path "./themes/spacegray-emacs")
+(load-theme 'spacegray t)
 
 (use-package evil
   :ensure t
@@ -70,6 +72,21 @@
     :ensure t
     :config
     (global-evil-matchit-mode 1)))
+
+(use-package zoom-window
+  :ensure t
+  :config
+  (setq zoom-window-mode-line-color "DarkGreen")
+  (evil-leader/set-key
+    "z" 'zoom-window-zoom))
+
+(use-package magit
+  :ensure t
+  :config
+  (setq evil-leader/no-prefix-mode-rx '("magit-.*-mode"))
+  (evil-leader/set-key
+    "gs" 'magit-status
+    "gl" 'magit-log-all))
 
 (use-package helm
   :ensure t
@@ -135,8 +152,16 @@
 
 (use-package handlebars-mode :ensure t)
 
+(use-package rvm
+  :ensure t
+  :config
+  (rvm-use-default))
+
 (use-package ruby-end :ensure t)
-(use-package inf-ruby :ensure t)
+(use-package inf-ruby
+  :ensure t
+  :config
+  (add-hook 'after-init-hook 'inf-ruby-switch-setup))
 
 (use-package enh-ruby-mode
   :ensure t
@@ -149,21 +174,28 @@
   :interpreter "ruby"
   :config
   (setq enh-ruby-deep-indent-paren nil
-        enh-ruby-check-syntax nil)
+        enh-ruby-check-syntax nil
+        enh-ruby-add-encoding-comment-on-save nil)
   (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode))
+
+(use-package haml-mode :ensure t)
+(use-package sass-mode :ensure t)
+
+(use-package rspec-mode
+  :ensure t
+  :config
+  (setq compilation-scroll-output t
+        rspec-use-rvm t))
 
 (use-package company
   :ensure t
   :config
   (global-company-mode))
 
-(use-package magit
+(use-package dockerfile-mode
   :ensure t
   :config
-  (setq evil-leader/no-prefix-mode-rx '("magit-.*-mode"))
-  (evil-leader/set-key
-    "gs" 'magit-status
-    "gl" 'magit-log-all))
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
 
 (use-package multi-term
   :ensure t
@@ -171,39 +203,43 @@
   (setq multi-term-program "/bin/bash"
 	multi-term-program-switches "--login"))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(coffee-indent-like-python-mode t)
- '(comint-completion-addsuffix t)
- '(comint-completion-autolist t)
- '(comint-input-ignoredups t)
- '(comint-move-point-for-output t)
- '(comint-scroll-show-maximum-output t)
- '(comint-scroll-to-bottom-on-input t)
- '(custom-safe-themes
-   (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "d9db2602073498bfa3d591e2ce70de3e9c144c30aeacf9e667b0fb9139f38f50" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default))))
+(use-package restclient :ensure t)
 
-; interpret and use ansi color codes in shell output windows
-(ansi-color-for-comint-mode-on)
+(use-package markdown-mode
+  :ensure t
+  :mode
+  (("\\.mkd\\'" . markdown-mode)
+   ("\\.markdown\\'" . markdown-mode)))
+
+(use-package yaml-mode
+  :ensure t
+  :mode
+  (("\\.yml\\'" . yaml-mode))
+  :config
+  (add-hook 'yaml-mode-hook
+      '(lambda ()
+        (define-key yaml-mode-map "\C-m" 'newline-and-indent))))
 
 (use-package org
   :ensure t
   :config
-  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)))
+  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+  (setq org-agenda-files (list "~/org"))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (sh . t)
+     (ruby . t)
+     )))
+
+(use-package org-bullets
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
 
 (use-package powerline
   :ensure t
   :config
   (setq ns-use-srgb-colorspace nil)
   (powerline-vim-theme))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
