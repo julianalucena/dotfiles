@@ -34,13 +34,18 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'post-forward)
 
-; (use-package solarized-theme
-;   :ensure t
-;   :config
-;   (load-theme 'solarized-dark)
-;   (set-face-attribute 'default nil :font "Monaco-12"))
-(add-to-list 'custom-theme-load-path "./themes/spacegray-emacs")
-(load-theme 'spacegray t)
+(use-package base16-theme
+  :ensure t
+  :config
+  (load-theme 'base16-tomorrow-night)
+  (set-face-attribute 'default nil :font "Source Code Pro-13"))
+
+(global-linum-mode t)
+
+(require 'whitespace)
+(setq whitespace-line-column 80) ;; limit line length
+(setq whitespace-style '(face lines-tail))
+(add-hook 'prog-mode-hook 'whitespace-mode)
 
 (use-package evil
   :ensure t
@@ -136,7 +141,8 @@
   (("\\.erb\\'" . web-mode)
    ("\\.scss\\'" . web-mode)
    ("\\.mustache\\'" . web-mode)
-   ("\\.html?\\'" . web-mode))
+   ("\\.html?\\'" . web-mode)
+   ("\\.ejs\\'" . web-mode))
   :config
   (setq
    web-mode-indent-style 2
@@ -179,6 +185,7 @@
   (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode))
 
 (use-package haml-mode :ensure t)
+(use-package slim-mode :ensure t)
 (use-package sass-mode :ensure t)
 
 (use-package rspec-mode
@@ -224,18 +231,27 @@
   :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-  (setq org-agenda-files (list "~/org"))
+  (setq org-agenda-files (list "~/org"
+                               "~/journal")
+        org-agenda-file-regexp "\\`[^.].*\\.org\\'\\|[0-9]+")
+
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
      (sh . t)
      (ruby . t)
-     )))
+     ))
+  (tags "REFILE" ((org-agenda-overriding-header "REFILE"))))
 
 (use-package org-bullets
   :ensure t
   :config
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+(use-package org-journal
+  :ensure t
+  :config
+  (setq org-journal-dir "~/journal/"))
 
 
 (use-package powerline
@@ -243,3 +259,32 @@
   :config
   (setq ns-use-srgb-colorspace nil)
   (powerline-vim-theme))
+
+(use-package git-link :ensure t)
+
+(use-package alchemist :ensure t)
+
+(add-to-list 'load-path "~/dotfiles/emacs/apib-mode")
+(autoload 'apib-mode "apib-mode"
+        "Major mode for editing API Blueprint files" t)
+(add-to-list 'auto-mode-alist '("\\.apib\\'" . apib-mode))
+
+(use-package go-mode :ensure t)
+(use-package company-go
+  :ensure t
+  :config
+  (setq company-tooltip-limit 20)                      ; bigger popup window
+  (setq company-idle-delay .3)                         ; decrease delay before autocompletion popup shows
+  (setq company-echo-delay 0)                          ; remove annoying blinking
+  (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+  (add-hook 'before-save-hook 'gofmt-before-save)
+
+  (add-hook 'go-mode-hook (lambda ()
+                          (set (make-local-variable 'company-backends) '(company-go))
+                          (company-mode))))
+
+(use-package protobuf-mode :ensure t)
+
+(use-package gorepl-mode :ensure t
+  :config
+  (add-hook 'go-mode-hook 'gorepl-mode))
