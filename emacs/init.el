@@ -9,9 +9,10 @@
 (require 'use-package)
 (use-package auto-compile
   :ensure t
-  :init (auto-compile-on-load-mode t))
+  :config (auto-compile-on-load-mode))
 (setq load-prefer-newer t)
 
+; A GNU Emacs library to ensure environment variables inside Emacs look the same as in the user's shell
 (use-package exec-path-from-shell
   :ensure t
   :config
@@ -20,33 +21,53 @@
 
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
+(global-linum-mode t)
+(fset 'yes-or-no-p 'y-or-n-p) ;; Answer with y and n instead of yes and no
+(global-auto-revert-mode 1) ;; Always reload the file if it changed on disk
+(show-paren-mode 1) ;; Highlight matching parens
 
-(setq ns-use-native-fullscreen nil)
-(toggle-frame-fullscreen)
+;; Default frame size
+(setq initial-frame-alist
+      '((top . 0) (left . 0) (width . 238) (height . 60)))
 
-(setq-default indent-tabs-mode nil
-      show-trailing-whitespace t
+(setq-default show-trailing-whitespace t
       inhibit-startup-message t
       initial-scratch-message nil)
-
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+;; Always use two spaces to indentation
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq-default c-basic-offset 2)
+(setq css-indent-offset 2)
+(setq js-indent-level 2)
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+
+;; Disable beep sound
+(setq visible-bell nil)
+(setq ring-bell-function (lambda () (message "*beep*")))
+
+; Emacs's traditional method for making buffer names unique adds
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'post-forward)
 
+; An architecture for building themes based on carefully chosen syntax highlighting using a base of sixteen colours
 (use-package base16-theme
   :ensure t
   :config
-  (load-theme 'base16-tomorrow-night)
-  (set-face-attribute 'default nil :font "Source Code Pro-13"))
+  (load-theme 'base16-ocean)
+  ;(set-face-attribute 'default nil :font "Source Code Pro-13")
+  (set-face-attribute 'default nil :font "Monaco-13"))
 
-(global-linum-mode t)
-
+; This package is a minor mode to visualize blanks (TAB, (HARD) SPACE and NEWLINE)
 (require 'whitespace)
 (setq whitespace-line-column 80) ;; limit line length
 (setq whitespace-style '(face lines-tail))
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
+; The extensible vi layer for Emacs
 (use-package evil
   :ensure t
   :config
@@ -78,6 +99,7 @@
     :config
     (global-evil-matchit-mode 1)))
 
+; zoom-window provides window zoom like tmux zoom and unzoom.
 (use-package zoom-window
   :ensure t
   :config
@@ -85,6 +107,7 @@
   (evil-leader/set-key
     "z" 'zoom-window-zoom))
 
+; Magit is an interface to the version control system Git
 (use-package magit
   :ensure t
   :config
@@ -93,6 +116,7 @@
     "gs" 'magit-status
     "gl" 'magit-log-all))
 
+; Emacs incremental completion and selection narrowing framework
 (use-package helm
   :ensure t
   :config
@@ -118,6 +142,7 @@
          helm-ag-command-option "--all-text"
          helm-ag-insert-at-point 'symbol))
 
+; Project Interaction Library for Emacs
 (use-package projectile
   :ensure t
   :config
@@ -135,6 +160,39 @@
       "p k" 'projectile-kill-buffers
       "/" 'helm-projectile-ag)))
 
+(use-package goto-chg :ensure t) ;; Go to last edit
+
+;; Advice commands to execute fullscreen, restoring the window setup when exiting
+(use-package fullframe
+  :ensure t
+  :config
+  (fullframe magit-status magit-mode-quit-window nil))
+
+(use-package saveplace
+  :ensure t
+  :config
+  (save-place-mode))
+
+;; Emacs’s undo system allows you to recover any past state of a buffer.
+;; It also has a tree visualization
+(use-package undo-tree
+  :ensure t
+  :config
+  (global-undo-tree-mode 1))
+
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode))
+
+(use-package neotree
+  :ensure t
+  :config
+  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
+  (evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
+  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter))
+
 (use-package web-mode
   :ensure t
   :mode
@@ -142,7 +200,8 @@
    ("\\.scss\\'" . web-mode)
    ("\\.mustache\\'" . web-mode)
    ("\\.html?\\'" . web-mode)
-   ("\\.ejs\\'" . web-mode))
+   ("\\.ejs\\'" . web-mode)
+   ("\\.js\\'" . web-mode))
   :config
   (setq
    web-mode-indent-style 2
@@ -151,38 +210,23 @@
    web-mode-css-indent-offset 2
    web-mode-enable-current-element-highlight t))
 
-(use-package coffee-mode
-  :ensure t
-  :config
-  (custom-set-variables '(coffee-indent-like-python-mode t)))
-
-(use-package handlebars-mode :ensure t)
-
 (use-package rvm
   :ensure t
   :config
-  (rvm-use-default))
+  (rvm-use-default)
+  (add-hook 'ruby-mode-hook
+            (lambda () (rvm-activate-corresponding-ruby))))
 
+(use-package ruby-mode :ensure t)
 (use-package ruby-end :ensure t)
-(use-package inf-ruby
+(use-package robe
   :ensure t
   :config
-  (add-hook 'after-init-hook 'inf-ruby-switch-setup))
-
-(use-package enh-ruby-mode
-  :ensure t
-  :mode
-  (("Capfile" . enh-ruby-mode)
-   ("Gemfile" . enh-ruby-mode)
-   ("Rakefile" . enh-ruby-mode)
-   ("\\.rb" . enh-ruby-mode)
-   ("\\.ru" . enh-ruby-mode))
-  :interpreter "ruby"
-  :config
-  (setq enh-ruby-deep-indent-paren nil
-        enh-ruby-check-syntax nil
-        enh-ruby-add-encoding-comment-on-save nil)
-  (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode))
+  (setq ruby-insert-encoding-magic-comment nil)
+  (add-hook 'ruby-mode-hook 'robe-mode)
+  (eval-after-load 'company
+    '(push 'company-robe company-backends))
+  (advice-add 'inf-ruby-console-auto :before #'rvm-activate-corresponding-ruby))
 
 (use-package haml-mode :ensure t)
 (use-package slim-mode :ensure t)
@@ -194,11 +238,6 @@
   (setq compilation-scroll-output t
         rspec-use-rvm t))
 
-(use-package company
-  :ensure t
-  :config
-  (global-company-mode))
-
 (use-package dockerfile-mode
   :ensure t
   :config
@@ -209,8 +248,6 @@
   :config
   (setq multi-term-program "/bin/bash"
 	multi-term-program-switches "--login"))
-
-(use-package restclient :ensure t)
 
 (use-package markdown-mode
   :ensure t
@@ -226,33 +263,6 @@
   (add-hook 'yaml-mode-hook
       '(lambda ()
         (define-key yaml-mode-map "\C-m" 'newline-and-indent))))
-
-(use-package org
-  :ensure t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-  (setq org-agenda-files (list "~/org"
-                               "~/journal")
-        org-agenda-file-regexp "\\`[^.].*\\.org\\'\\|[0-9]+")
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '(
-     (sh . t)
-     (ruby . t)
-     ))
-  (tags "REFILE" ((org-agenda-overriding-header "REFILE"))))
-
-(use-package org-bullets
-  :ensure t
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-
-(use-package org-journal
-  :ensure t
-  :config
-  (setq org-journal-dir "~/journal/"))
-
 
 (use-package powerline
   :ensure t
@@ -288,3 +298,15 @@
 (use-package gorepl-mode :ensure t
   :config
   (add-hook 'go-mode-hook 'gorepl-mode))
+
+(use-package graphql-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.graphqls\\'" . graphql-mode)))
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
