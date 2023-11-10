@@ -51,6 +51,10 @@ let mapleader="\<space>"
 " Save current file
 noremap <leader>s :w<cr>
 
+" Split using | and -
+noremap <leader>| :vsp<cr>
+noremap <leader>- :sp<cr>
+
 " Close current split
 noremap <leader>w <C-w>c
 
@@ -81,6 +85,13 @@ nmap <silent> <leader>tn <cmd>TestNearest<cr>
 nmap <silent> <leader>tf <cmd>TestFile<cr>
 nmap <silent> <leader>tl <cmd>TestLast<cr>
 nmap <silent> <leader>tg <cmd>TestVisit<cr>
+
+" Neogit shortcuts
+noremap <leader>gs :Neogit<cr>
+
+" NvimTree shortcuts
+noremap <leader>\ :NvimTreeToggle<cr>
+noremap <leader>\f :NvimTreeFindFile<cr>
 
 let g:startify_bookmarks = [ {'vimrc': '~/.config/nvim/init.vim'}, { 'zshrc': '~/.zshrc' } ]
 
